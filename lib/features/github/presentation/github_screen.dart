@@ -24,7 +24,8 @@ class _GitHubScreenState extends ConsumerState<GitHubScreen> {
       appBar: AppBar(
         title: const Text(
           'GitHub Integration',
-          style: TextStyle(fontFamily: 'Caveat', fontSize: 26, fontWeight: FontWeight.bold),
+          style: TextStyle(
+              fontFamily: 'Caveat', fontSize: 26, fontWeight: FontWeight.bold),
         ),
       ),
       body: ListView(
@@ -34,17 +35,23 @@ class _GitHubScreenState extends ConsumerState<GitHubScreen> {
           const SketchCard(
             id: 'gh-security-explainer',
             hasTornEdge: true,
-            borderColor: SketchPalette.skyBlue,
+            borderColor: SketchPalette.charcoal,
+            backgroundColor: SketchPalette.charcoal,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   children: [
-                    Icon(Icons.security, size: 18, color: SketchPalette.skyBlue),
+                    Icon(Icons.security,
+                        size: 18, color: SketchPalette.skyBlue),
                     SizedBox(width: 8),
                     Text(
                       'GitHub App Architecture & Security',
-                      style: TextStyle(fontFamily: 'Caveat', fontSize: 18, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                          fontFamily: 'Caveat',
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: SketchPalette.inkCream),
                     ),
                   ],
                 ),
@@ -53,7 +60,8 @@ class _GitHubScreenState extends ConsumerState<GitHubScreen> {
                   '• Read-only permissions: Only public repository metadata, commits, PRs, and issues are read.\n'
                   '• Short-lived tokens: Tokens are minted server-side and never stored on mobile client.\n'
                   '• Authorization is separate from owner login.',
-                  style: TextStyle(fontSize: 12, height: 1.4),
+                  style: TextStyle(
+                      fontSize: 12, height: 1.5, color: SketchPalette.inkCream),
                 ),
               ],
             ),
@@ -68,7 +76,8 @@ class _GitHubScreenState extends ConsumerState<GitHubScreen> {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Authorized Repositories', style: TextStyle(fontFamily: 'Caveat', fontSize: 20, fontWeight: FontWeight.bold)),
+                  const SketchSectionHeading(
+                      eyebrow: 'GitHub app', title: 'Authorized repositories'),
                   const SizedBox(height: 6),
                   SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
@@ -85,7 +94,8 @@ class _GitHubScreenState extends ConsumerState<GitHubScreen> {
                               child: SketchChip(
                                 label: '${r.name} (★${r.starsCount})',
                                 isSelected: _selectedRepo == r.name,
-                                onTap: () => setState(() => _selectedRepo = r.name),
+                                onTap: () =>
+                                    setState(() => _selectedRepo = r.name),
                               ),
                             )),
                       ],
@@ -123,10 +133,14 @@ class _GitHubScreenState extends ConsumerState<GitHubScreen> {
 
           // Activity Items (Bounded & Paginated, max 20)
           FutureBuilder<List<GitHubActivityItem>>(
-            future: ghRepo.getRecentActivity(repoName: _selectedRepo, limit: 20),
+            future:
+                ghRepo.getRecentActivity(repoName: _selectedRepo, limit: 20),
             builder: (context, snap) {
               if (snap.connectionState == ConnectionState.waiting) {
-                return const Center(child: Padding(padding: EdgeInsets.all(20), child: CircularProgressIndicator()));
+                return const Center(
+                    child: Padding(
+                        padding: EdgeInsets.all(20),
+                        child: CircularProgressIndicator()));
               }
               var items = snap.data ?? [];
               if (_typeFilter != null) {
@@ -134,7 +148,10 @@ class _GitHubScreenState extends ConsumerState<GitHubScreen> {
               }
 
               if (items.isEmpty) {
-                return const Center(child: Padding(padding: EdgeInsets.all(30), child: Text('No activity items found.')));
+                return const Center(
+                    child: Padding(
+                        padding: EdgeInsets.all(30),
+                        child: Text('No activity items found.')));
               }
 
               return Column(
@@ -173,17 +190,29 @@ class _GitHubScreenState extends ConsumerState<GitHubScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Text(it.repoName, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.grey)),
-                                  Text('${it.timestamp.month}/${it.timestamp.day} by ${it.author}', style: const TextStyle(fontSize: 10, color: Colors.grey)),
+                                  Text(it.repoName,
+                                      style: const TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.grey)),
+                                  Text(
+                                      '${it.timestamp.month}/${it.timestamp.day} by ${it.author}',
+                                      style: const TextStyle(
+                                          fontSize: 10, color: Colors.grey)),
                                 ],
                               ),
                               const SizedBox(height: 2),
-                              Text(it.title, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+                              Text(it.title,
+                                  style: const TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.bold)),
                               if (it.summary.isNotEmpty) ...[
                                 const SizedBox(height: 2),
-                                Text(it.summary, style: const TextStyle(fontSize: 12)),
+                                Text(it.summary,
+                                    style: const TextStyle(fontSize: 12)),
                               ],
                             ],
                           ),

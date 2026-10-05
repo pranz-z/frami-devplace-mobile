@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import '../../../core/theme/sketch_theme.dart';
 import '../../../core/widgets/sketch_widgets.dart';
 import '../../../core/providers/app_providers.dart';
@@ -23,7 +24,8 @@ class TodayScreen extends ConsumerWidget {
       appBar: AppBar(
         title: const Text(
           'Today\'s Workspace',
-          style: TextStyle(fontFamily: 'Caveat', fontSize: 26, fontWeight: FontWeight.bold),
+          style: TextStyle(
+              fontFamily: 'Caveat', fontSize: 26, fontWeight: FontWeight.bold),
         ),
         actions: [
           IconButton(
@@ -45,7 +47,9 @@ class TodayScreen extends ConsumerWidget {
       ),
       body: tasksAsync.when(
         data: (tasks) {
-          final dueTodayTasks = tasks.where((t) => t.isDueToday && t.status != TaskStatus.done).toList();
+          final dueTodayTasks = tasks
+              .where((t) => t.isDueToday && t.status != TaskStatus.done)
+              .toList();
           final overdueTasks = tasks.where((t) => t.isOverdue).toList();
 
           return RefreshIndicator(
@@ -54,7 +58,8 @@ class TodayScreen extends ConsumerWidget {
               ref.invalidate(projectsProvider);
             },
             child: ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
               children: [
                 // Greeting and Date
                 _buildGreetingCard(context),
@@ -72,7 +77,8 @@ class TodayScreen extends ConsumerWidget {
                 if (overdueTasks.isNotEmpty) ...[
                   Row(
                     children: [
-                      const Icon(Icons.warning_amber_rounded, size: 18, color: SketchPalette.danger),
+                      const Icon(Icons.warning_amber_rounded,
+                          size: 18, color: SketchPalette.danger),
                       const SizedBox(width: 6),
                       Text(
                         'Overdue (${overdueTasks.length})',
@@ -86,27 +92,19 @@ class TodayScreen extends ConsumerWidget {
                     ],
                   ),
                   const SizedBox(height: 6),
-                  ...overdueTasks.map((t) => _buildTaskItem(context, ref, t, isOverdue: true)),
+                  ...overdueTasks.map(
+                      (t) => _buildTaskItem(context, ref, t, isOverdue: true)),
                   const SizedBox(height: 14),
                 ],
 
                 // Tasks Due Today
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Tasks Due Today (${dueTodayTasks.length})',
-                      style: const TextStyle(
-                        fontFamily: 'Caveat',
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    TextButton(
-                      onPressed: () => context.go('/app/kanban'),
-                      child: const Text('View Board →', style: TextStyle(fontSize: 12)),
-                    ),
-                  ],
+                SketchSectionHeading(
+                  eyebrow: 'Execution',
+                  title: 'Today’s tasks',
+                  trailing: TextButton(
+                    onPressed: () => context.go('/app/kanban'),
+                    child: const Text('View board'),
+                  ),
                 ),
                 const SizedBox(height: 6),
                 if (dueTodayTasks.isEmpty)
@@ -119,7 +117,9 @@ class TodayScreen extends ConsumerWidget {
                         style: TextStyle(
                           fontFamily: 'Inter',
                           fontSize: 13,
-                          color: isDark ? SketchPalette.inkMutedDark : SketchPalette.inkMutedLight,
+                          color: isDark
+                              ? SketchPalette.inkMutedDark
+                              : SketchPalette.inkMutedLight,
                         ),
                       ),
                     ),
@@ -132,10 +132,8 @@ class TodayScreen extends ConsumerWidget {
                 const SizedBox(height: 8),
 
                 // Quick Actions
-                const Text(
-                  'Quick Actions',
-                  style: TextStyle(fontFamily: 'Caveat', fontSize: 20, fontWeight: FontWeight.bold),
-                ),
+                const SketchSectionHeading(
+                    eyebrow: 'Shortcuts', title: 'Quick actions'),
                 const SizedBox(height: 8),
                 Wrap(
                   spacing: 8,
@@ -187,39 +185,51 @@ class TodayScreen extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Text(
+            'WORKSPACE • ${DateFormat('EEEE, MMMM d').format(DateTime.now())}'
+                .toUpperCase(),
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  letterSpacing: 1.25,
+                  fontWeight: FontWeight.w700,
+                ),
+          ),
+          const SizedBox(height: 4),
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const MarkerHighlight(text: 'Hello, Frami'),
+              const Expanded(child: MarkerHighlight(text: 'Hello, Frami ✦')),
+              const SizedBox(width: 8),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: SketchPalette.sageGreen.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(4),
+                  color: SketchPalette.sageGreen.withValues(alpha: 0.16),
+                  borderRadius: BorderRadius.circular(5),
                   border: Border.all(color: SketchPalette.sageGreen, width: 1),
                 ),
-                child: const Text(
-                  'Private OS Active',
-                  style: TextStyle(fontFamily: 'Caveat', fontSize: 13, fontWeight: FontWeight.bold),
-                ),
+                child: const Text('PRIVATE',
+                    style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 1)),
               ),
             ],
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 8),
           const Text(
             'Keep building privately. When ready, project approved case studies to your public portfolio.',
-            style: TextStyle(fontSize: 13),
+            style: TextStyle(fontSize: 13, height: 1.45),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildFocusCard(BuildContext context, WidgetRef ref, FocusSession session) {
+  Widget _buildFocusCard(
+      BuildContext context, WidgetRef ref, FocusSession session) {
     final remainingSec = session.getRemainingSeconds();
     final mins = remainingSec ~/ 60;
     final secs = remainingSec % 60;
-    final timeStr = '${mins.toString().padLeft(2, '0')}:${secs.toString().padLeft(2, '0')}';
+    final timeStr =
+        '${mins.toString().padLeft(2, '0')}:${secs.toString().padLeft(2, '0')}';
     final isRunning = session.status == FocusSessionStatus.running;
 
     return SketchCard(
@@ -247,7 +257,8 @@ class TodayScreen extends ConsumerWidget {
                   session.taskTitle ?? 'Deep Work Focus Session',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                  style: const TextStyle(
+                      fontWeight: FontWeight.bold, fontSize: 14),
                 ),
                 Text(
                   'Remaining: $timeStr (${session.status.name})',
@@ -293,7 +304,8 @@ class TodayScreen extends ConsumerWidget {
             children: [
               Row(
                 children: [
-                  const Icon(Icons.favorite, size: 16, color: SketchPalette.dustyRose),
+                  const Icon(Icons.favorite,
+                      size: 16, color: SketchPalette.dustyRose),
                   const SizedBox(width: 6),
                   Text(
                     'Workspace Rhythm Score',
@@ -325,7 +337,8 @@ class TodayScreen extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: 8),
-          HandDrawnProgressBar(progress: report.score / 100.0, color: badgeColor),
+          HandDrawnProgressBar(
+              progress: report.score / 100.0, color: badgeColor),
           const SizedBox(height: 8),
           Text(
             report.summary,
@@ -336,7 +349,8 @@ class TodayScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildTaskItem(BuildContext context, WidgetRef ref, Task task, {bool isOverdue = false}) {
+  Widget _buildTaskItem(BuildContext context, WidgetRef ref, Task task,
+      {bool isOverdue = false}) {
     return SketchCard(
       id: task.id,
       margin: const EdgeInsets.symmetric(vertical: 4),
@@ -348,7 +362,8 @@ class TodayScreen extends ConsumerWidget {
             value: task.status == TaskStatus.done,
             activeColor: SketchPalette.sageGreen,
             onChanged: (bool? val) {
-              final newStatus = (val == true) ? TaskStatus.done : TaskStatus.todo;
+              final newStatus =
+                  (val == true) ? TaskStatus.done : TaskStatus.todo;
               ref.read(tasksProvider.notifier).moveTask(
                     taskId: task.id,
                     targetStatus: newStatus,
@@ -366,7 +381,9 @@ class TodayScreen extends ConsumerWidget {
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
-                    decoration: task.status == TaskStatus.done ? TextDecoration.lineThrough : null,
+                    decoration: task.status == TaskStatus.done
+                        ? TextDecoration.lineThrough
+                        : null,
                   ),
                 ),
                 if (task.description.isNotEmpty)

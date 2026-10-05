@@ -14,7 +14,8 @@ class CalendarScreen extends ConsumerStatefulWidget {
 }
 
 class _CalendarScreenState extends ConsumerState<CalendarScreen> {
-  DateTime _currentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month, 1);
+  DateTime _currentMonth =
+      DateTime.utc(DateTime.now().year, DateTime.now().month, 1);
   DateTime? _selectedDate;
   String _filter = 'All'; // 'All', 'Tasks', 'Milestones'
 
@@ -33,7 +34,8 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
       appBar: AppBar(
         title: const Text(
           'Workspace Calendar',
-          style: TextStyle(fontFamily: 'Caveat', fontSize: 26, fontWeight: FontWeight.bold),
+          style: TextStyle(
+              fontFamily: 'Caveat', fontSize: 26, fontWeight: FontWeight.bold),
         ),
         actions: [
           IconButton(
@@ -51,49 +53,57 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
       ),
       body: tasksAsync.when(
         data: (allTasks) {
-          final unscheduledTasks = allTasks.where((t) => t.dueDate == null).toList();
+          final unscheduledTasks =
+              allTasks.where((t) => t.dueDate == null).toList();
 
           return Column(
             children: [
               // Month Switcher Header
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.chevron_left),
-                      onPressed: () {
-                        setState(() {
-                          _currentMonth = DateTime.utc(
-                            _currentMonth.year,
-                            _currentMonth.month - 1,
-                            1,
-                          );
-                        });
-                      },
-                    ),
-                    Text(
-                      '${_getMonthName(_currentMonth.month)} ${_currentMonth.year}',
-                      style: const TextStyle(
-                        fontFamily: 'Caveat',
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16.0, vertical: 6.0),
+                child: SketchCard(
+                  id: 'calendar-month-switcher',
+                  margin: EdgeInsets.zero,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.chevron_left),
+                        onPressed: () {
+                          setState(() {
+                            _currentMonth = DateTime.utc(
+                              _currentMonth.year,
+                              _currentMonth.month - 1,
+                              1,
+                            );
+                          });
+                        },
                       ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.chevron_right),
-                      onPressed: () {
-                        setState(() {
-                          _currentMonth = DateTime.utc(
-                            _currentMonth.year,
-                            _currentMonth.month + 1,
-                            1,
-                          );
-                        });
-                      },
-                    ),
-                  ],
+                      Text(
+                        '${_getMonthName(_currentMonth.month)} ${_currentMonth.year}',
+                        style: const TextStyle(
+                          fontFamily: 'Caveat',
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.chevron_right),
+                        onPressed: () {
+                          setState(() {
+                            _currentMonth = DateTime.utc(
+                              _currentMonth.year,
+                              _currentMonth.month + 1,
+                              1,
+                            );
+                          });
+                        },
+                      ),
+                    ],
+                  ),
                 ),
               ),
 
@@ -151,21 +161,24 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
   }
 
   Widget _buildMonthGrid(List<Task> allTasks) {
-    final daysInMonth = DateUtils.getDaysInMonth(_currentMonth.year, _currentMonth.month);
-    final firstDayOfWeek = DateTime.utc(_currentMonth.year, _currentMonth.month, 1).weekday; // 1 = Mon
+    final daysInMonth =
+        DateUtils.getDaysInMonth(_currentMonth.year, _currentMonth.month);
+    final firstDayOfWeek =
+        DateTime.utc(_currentMonth.year, _currentMonth.month, 1)
+            .weekday; // 1 = Mon
     final offset = (firstDayOfWeek - 1) % 7;
 
     final weekDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12.0),
+    return SketchCard(
+      id: 'calendar-month-grid',
+      margin: const EdgeInsets.symmetric(horizontal: 12),
+      padding: const EdgeInsets.all(8),
       child: Column(
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: weekDays
-                .map((d) => SizedBox(
-                      width: 38,
+                .map((d) => Expanded(
                       child: Center(
                         child: Text(
                           d,
@@ -184,7 +197,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
           GridView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            itemCount: 35, // 5 weeks display
+            itemCount: 42, // Calendar months can span six weeks.
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 7,
               childAspectRatio: 1.1,
@@ -195,7 +208,8 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                 return const SizedBox.shrink();
               }
 
-              final cellDate = DateTime.utc(_currentMonth.year, _currentMonth.month, dayNumber);
+              final cellDate = DateTime.utc(
+                  _currentMonth.year, _currentMonth.month, dayNumber);
               final isSelected = _selectedDate != null &&
                   _selectedDate!.year == cellDate.year &&
                   _selectedDate!.month == cellDate.month &&
@@ -230,12 +244,16 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                       decoration: BoxDecoration(
                         color: isSelected
                             ? SketchPalette.markerYellow.withValues(alpha: 0.3)
-                            : (isHovered ? SketchPalette.skyBlue.withValues(alpha: 0.2) : Colors.transparent),
+                            : (isHovered
+                                ? SketchPalette.skyBlue.withValues(alpha: 0.2)
+                                : Colors.transparent),
                         borderRadius: BorderRadius.circular(6),
                         border: Border.all(
                           color: isSelected
                               ? SketchPalette.borderLight
-                              : (isHovered ? SketchPalette.skyBlue : Colors.transparent),
+                              : (isHovered
+                                  ? SketchPalette.skyBlue
+                                  : Colors.transparent),
                           width: isSelected ? 1.5 : 1.0,
                         ),
                       ),
@@ -246,7 +264,9 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                             '$dayNumber',
                             style: TextStyle(
                               fontSize: 13,
-                              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                              fontWeight: isSelected
+                                  ? FontWeight.bold
+                                  : FontWeight.normal,
                             ),
                           ),
                           if (tasksOnDate.isNotEmpty)
@@ -267,7 +287,9 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                                   const SizedBox(width: 2),
                                   Text(
                                     '${tasksOnDate.length}',
-                                    style: const TextStyle(fontSize: 9, fontWeight: FontWeight.bold),
+                                    style: const TextStyle(
+                                        fontSize: 9,
+                                        fontWeight: FontWeight.bold),
                                   ),
                                 ],
                               ],
@@ -303,7 +325,10 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
           children: [
             Text(
               'Agenda for ${_selectedDate!.month}/${_selectedDate!.day}/${_selectedDate!.year}',
-              style: const TextStyle(fontFamily: 'Caveat', fontSize: 20, fontWeight: FontWeight.bold),
+              style: const TextStyle(
+                  fontFamily: 'Caveat',
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold),
             ),
             SketchButton(
               isSmall: true,
@@ -312,7 +337,8 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                 context: context,
                 isScrollControlled: true,
                 backgroundColor: Colors.transparent,
-                builder: (ctx) => CreateTaskModal(initialDueDate: _selectedDate),
+                builder: (ctx) =>
+                    CreateTaskModal(initialDueDate: _selectedDate),
               ),
               child: const Text('Add on Date'),
             ),
@@ -320,7 +346,8 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
         ),
         const SizedBox(height: 6),
         if (dateTasks.isEmpty)
-          const Text('No scheduled items on this date.', style: TextStyle(fontSize: 12, color: Colors.grey))
+          const Text('No scheduled items on this date.',
+              style: TextStyle(fontSize: 12, color: Colors.grey))
         else
           ...dateTasks.map((t) => _buildAgendaTaskCard(context, t)),
       ],
@@ -355,10 +382,13 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.bold,
-                    decoration: t.status == TaskStatus.done ? TextDecoration.lineThrough : null,
+                    decoration: t.status == TaskStatus.done
+                        ? TextDecoration.lineThrough
+                        : null,
                   ),
                 ),
-                Text('Status: ${t.status.label} • Priority: ${t.priority.label}',
+                Text(
+                    'Status: ${t.status.label} • Priority: ${t.priority.label}',
                     style: const TextStyle(fontSize: 11, color: Colors.grey)),
               ],
             ),
@@ -393,14 +423,19 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
           children: [
             Text(
               'Unscheduled Tray (${unscheduled.length})',
-              style: const TextStyle(fontFamily: 'Caveat', fontSize: 20, fontWeight: FontWeight.bold),
+              style: const TextStyle(
+                  fontFamily: 'Caveat',
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold),
             ),
-            const Text('Drag onto any date', style: TextStyle(fontSize: 11, color: Colors.grey)),
+            const Text('Drag onto any date',
+                style: TextStyle(fontSize: 11, color: Colors.grey)),
           ],
         ),
         const SizedBox(height: 6),
         if (unscheduled.isEmpty)
-          const Text('All tasks are scheduled!', style: TextStyle(fontSize: 12, color: Colors.grey))
+          const Text('All tasks are scheduled!',
+              style: TextStyle(fontSize: 12, color: Colors.grey))
         else
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
@@ -412,7 +447,8 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                     color: Colors.transparent,
                     child: SizedBox(
                       width: 180,
-                      child: SketchCard(id: 'drag-${t.id}', child: Text(t.title)),
+                      child:
+                          SketchCard(id: 'drag-${t.id}', child: Text(t.title)),
                     ),
                   ),
                   child: Container(
@@ -424,8 +460,14 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(t.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-                          Text(t.priority.label, style: const TextStyle(fontSize: 10, color: Colors.grey)),
+                          Text(t.title,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                  fontSize: 12, fontWeight: FontWeight.bold)),
+                          Text(t.priority.label,
+                              style: const TextStyle(
+                                  fontSize: 10, color: Colors.grey)),
                         ],
                       ),
                     ),
@@ -438,7 +480,8 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
     );
   }
 
-  void _showDayAgendaSheet(BuildContext context, DateTime date, List<Task> tasks) {
+  void _showDayAgendaSheet(
+      BuildContext context, DateTime date, List<Task> tasks) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -447,7 +490,9 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
         final isDark = Theme.of(ctx).brightness == Brightness.dark;
         return Container(
           decoration: BoxDecoration(
-            color: isDark ? SketchPalette.paperCardDark : SketchPalette.paperCardLight,
+            color: isDark
+                ? SketchPalette.paperCardDark
+                : SketchPalette.paperCardLight,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
           ),
           padding: const EdgeInsets.all(16),
@@ -460,9 +505,14 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                 children: [
                   Text(
                     'Agenda: ${date.month}/${date.day}/${date.year}',
-                    style: const TextStyle(fontFamily: 'Caveat', fontSize: 22, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                        fontFamily: 'Caveat',
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold),
                   ),
-                  IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.pop(ctx)),
+                  IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: () => Navigator.pop(ctx)),
                 ],
               ),
               const SizedBox(height: 10),
@@ -478,8 +528,10 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                       trailing: Checkbox(
                         value: t.status == TaskStatus.done,
                         onChanged: (val) {
-                          final next = (val == true) ? TaskStatus.done : TaskStatus.todo;
-                          ref.read(tasksProvider.notifier).moveTask(taskId: t.id, targetStatus: next, targetIndex: 0);
+                          final next =
+                              (val == true) ? TaskStatus.done : TaskStatus.todo;
+                          ref.read(tasksProvider.notifier).moveTask(
+                              taskId: t.id, targetStatus: next, targetIndex: 0);
                           Navigator.pop(ctx);
                         },
                       ),
@@ -510,8 +562,18 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
 
   String _getMonthName(int month) {
     const names = [
-      'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December'
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December'
     ];
     return names[month - 1];
   }

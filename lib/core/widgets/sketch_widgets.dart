@@ -11,6 +11,8 @@ class SketchBorderPainter extends CustomPainter {
   final int seed;
   final Color? fillColor;
   final bool hasTornEdge;
+  final Color? shadowColor;
+  final double shadowElevation;
 
   // Path cache
   static final Map<String, Path> _pathCache = {};
@@ -22,6 +24,8 @@ class SketchBorderPainter extends CustomPainter {
     required this.seed,
     this.fillColor,
     this.hasTornEdge = false,
+    this.shadowColor,
+    this.shadowElevation = 0,
   });
 
   @override
@@ -38,6 +42,10 @@ class SketchBorderPainter extends CustomPainter {
         _pathCache.clear();
       }
       _pathCache[cacheKey] = path;
+    }
+
+    if (shadowColor != null && shadowElevation > 0) {
+      canvas.drawShadow(path, shadowColor!, shadowElevation, false);
     }
 
     if (fillColor != null && fillColor != Colors.transparent) {
@@ -138,6 +146,7 @@ class SketchCard extends StatelessWidget {
   final bool hasTornEdge;
   final double? width;
   final double? height;
+  final double shadowElevation;
 
   const SketchCard({
     super.key,
@@ -147,12 +156,13 @@ class SketchCard extends StatelessWidget {
     this.margin = const EdgeInsets.symmetric(vertical: 6.0, horizontal: 2.0),
     this.backgroundColor,
     this.borderColor,
-    this.borderWidth = 1.4,
-    this.cornerRadius = 8.0,
+    this.borderWidth = 1.15,
+    this.cornerRadius = 10.0,
     this.onTap,
     this.hasTornEdge = false,
     this.width,
     this.height,
+    this.shadowElevation = 1.5,
   });
 
   @override
@@ -163,6 +173,8 @@ class SketchCard extends StatelessWidget {
         isDark ? SketchPalette.borderDark : SketchPalette.borderLight;
     final defaultFill =
         isDark ? SketchPalette.paperCardDark : SketchPalette.paperCardLight;
+    final tokens =
+        Theme.of(context).extension<SketchTokens>() ?? SketchTokens.light;
 
     Widget content = Container(
       width: width,
@@ -176,6 +188,8 @@ class SketchCard extends StatelessWidget {
           seed: seed,
           fillColor: backgroundColor ?? defaultFill,
           hasTornEdge: hasTornEdge,
+          shadowColor: tokens.cardShadow,
+          shadowElevation: shadowElevation,
         ),
         child: Padding(
           padding: padding,
@@ -192,6 +206,52 @@ class SketchCard extends StatelessWidget {
       );
     }
     return content;
+  }
+}
+
+/// A compact eyebrow and handwritten heading used to introduce screen sections.
+class SketchSectionHeading extends StatelessWidget {
+  final String title;
+  final String? eyebrow;
+  final Widget? trailing;
+
+  const SketchSectionHeading({
+    super.key,
+    required this.title,
+    this.eyebrow,
+    this.trailing,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (eyebrow != null) ...[
+                Text(
+                  eyebrow!.toUpperCase(),
+                  style: textTheme.labelSmall?.copyWith(
+                    letterSpacing: 1.5,
+                    fontWeight: FontWeight.w700,
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? SketchPalette.inkMutedDark
+                        : SketchPalette.inkMutedLight,
+                  ),
+                ),
+                const SizedBox(height: 2),
+              ],
+              Text(title, style: textTheme.headlineSmall),
+            ],
+          ),
+        ),
+        if (trailing != null) trailing!,
+      ],
+    );
   }
 }
 
@@ -232,7 +292,9 @@ class SketchButton extends StatelessWidget {
       border = isDark ? SketchPalette.borderDark : SketchPalette.borderLight;
     } else {
       bg = backgroundColor ??
-          (isDark ? SketchPalette.markerYellowDark : SketchPalette.markerYellow);
+          (isDark
+              ? SketchPalette.markerYellowDark
+              : SketchPalette.markerYellow);
       fg = textColor ?? SketchPalette.inkDark;
       border = borderColor ??
           (isDark ? SketchPalette.inkCream : SketchPalette.borderLight);
@@ -273,12 +335,16 @@ class SketchButton extends StatelessWidget {
                     const SizedBox(width: 6),
                   ],
                   DefaultTextStyle(
-                    style: TextStyle(
-                      fontFamily: 'Caveat',
-                      fontSize: isSmall ? 16 : 18,
-                      fontWeight: FontWeight.bold,
-                      color: fg,
-                    ),
+                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                              fontSize: isSmall ? 13 : 14,
+                              fontWeight: FontWeight.w600,
+                              color: fg,
+                            ) ??
+                        TextStyle(
+                          fontSize: isSmall ? 13 : 14,
+                          fontWeight: FontWeight.w600,
+                          color: fg,
+                        ),
                     child: child,
                   ),
                 ],
@@ -315,9 +381,14 @@ class SketchChip extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final chipColor = color ??
         (isSelected
-            ? (isDark ? SketchPalette.markerYellowDark : SketchPalette.markerYellow)
-            : (isDark ? SketchPalette.paperSurfaceDark : SketchPalette.paperSurfaceLight));
-    final fgColor = textColor ?? (isDark ? SketchPalette.inkCream : SketchPalette.inkDark);
+            ? (isDark
+                ? SketchPalette.markerYellowDark
+                : SketchPalette.markerYellow)
+            : (isDark
+                ? SketchPalette.paperSurfaceDark
+                : SketchPalette.paperSurfaceLight));
+    final fgColor =
+        textColor ?? (isDark ? SketchPalette.inkCream : SketchPalette.inkDark);
     final borderColor = isSelected
         ? (isDark ? SketchPalette.inkCream : SketchPalette.borderLight)
         : (isDark ? SketchPalette.borderDark : SketchPalette.borderSubtleLight);
@@ -340,12 +411,11 @@ class SketchChip extends StatelessWidget {
             ],
             Text(
               label,
-              style: TextStyle(
-                fontFamily: 'Caveat',
-                fontSize: 14,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
-                color: fgColor,
-              ),
+              style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                    fontSize: 12,
+                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                    color: fgColor,
+                  ),
             ),
           ],
         ),
@@ -392,7 +462,7 @@ class MarkerHighlight extends StatelessWidget {
         Text(
           text,
           style: style ??
-              Theme.of(context).textTheme.titleMedium?.copyWith(
+              Theme.of(context).textTheme.headlineMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
         ),
@@ -412,7 +482,9 @@ class DoodleDivider extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final strokeColor = color ??
-        (isDark ? SketchPalette.borderSubtleDark : SketchPalette.borderSubtleLight);
+        (isDark
+            ? SketchPalette.borderSubtleDark
+            : SketchPalette.borderSubtleLight);
 
     return SizedBox(
       height: height,
@@ -472,8 +544,10 @@ class HandDrawnProgressBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final fill = color ?? (isDark ? SketchPalette.sageGreen : SketchPalette.sageGreen);
-    final border = isDark ? SketchPalette.borderDark : SketchPalette.borderLight;
+    final fill =
+        color ?? (isDark ? SketchPalette.sageGreen : SketchPalette.sageGreen);
+    final border =
+        isDark ? SketchPalette.borderDark : SketchPalette.borderLight;
     final clamped = progress.clamp(0.0, 1.0);
 
     return SizedBox(
@@ -510,14 +584,17 @@ class _HandDrawnProgressBarPainter extends CustomPainter {
       ..style = PaintingStyle.stroke;
 
     // Draw rough outline
-    canvas.drawRRect(RRect.fromRectAndRadius(r, const Radius.circular(4)), borderPaint);
+    canvas.drawRRect(
+        RRect.fromRectAndRadius(r, const Radius.circular(4)), borderPaint);
 
     if (progress > 0) {
-      final fillR = Rect.fromLTWH(1, 1, (size.width - 2) * progress, size.height - 2);
+      final fillR =
+          Rect.fromLTWH(1, 1, (size.width - 2) * progress, size.height - 2);
       final fillPaint = Paint()
         ..color = fillColor
         ..style = PaintingStyle.fill;
-      canvas.drawRRect(RRect.fromRectAndRadius(fillR, const Radius.circular(3)), fillPaint);
+      canvas.drawRRect(
+          RRect.fromRectAndRadius(fillR, const Radius.circular(3)), fillPaint);
     }
   }
 

@@ -28,7 +28,8 @@ class _KanbanBoardScreenState extends ConsumerState<KanbanBoardScreen> {
   @override
   void initState() {
     super.initState();
-    _pageController = PageController(initialPage: _activeColumnIndex, viewportFraction: 0.88);
+    _pageController =
+        PageController(initialPage: _activeColumnIndex, viewportFraction: 0.88);
   }
 
   @override
@@ -44,8 +45,7 @@ class _KanbanBoardScreenState extends ConsumerState<KanbanBoardScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'Task Kanban Board',
-          style: TextStyle(fontFamily: 'Caveat', fontSize: 26, fontWeight: FontWeight.bold),
+          'Tasks',
         ),
         actions: [
           IconButton(
@@ -64,10 +64,42 @@ class _KanbanBoardScreenState extends ConsumerState<KanbanBoardScreen> {
         data: (allTasks) {
           return Column(
             children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(14, 8, 14, 0),
+                child: SketchCard(
+                  id: 'kanban-intro',
+                  backgroundColor: SketchPalette.charcoal,
+                  borderColor: SketchPalette.charcoal,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'EXECUTION',
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                              color: SketchPalette.inkMutedDark,
+                              letterSpacing: 1.5,
+                              fontWeight: FontWeight.w700,
+                            ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'Task management',
+                        style: Theme.of(context)
+                            .textTheme
+                            .headlineSmall
+                            ?.copyWith(color: SketchPalette.inkCream),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
               // Column Tab Strip / Indicator
               SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
                 child: Row(
                   children: List.generate(_columns.length, (idx) {
                     final col = _columns[idx];
@@ -75,7 +107,8 @@ class _KanbanBoardScreenState extends ConsumerState<KanbanBoardScreen> {
                     final isCurrent = _activeColumnIndex == idx;
 
                     return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 4.0, vertical: 2),
                       child: SketchChip(
                         label: '${col.label} ($count)',
                         isSelected: isCurrent,
@@ -97,10 +130,13 @@ class _KanbanBoardScreenState extends ConsumerState<KanbanBoardScreen> {
                 child: PageView.builder(
                   controller: _pageController,
                   itemCount: _columns.length,
-                  onPageChanged: (idx) => setState(() => _activeColumnIndex = idx),
+                  onPageChanged: (idx) =>
+                      setState(() => _activeColumnIndex = idx),
                   itemBuilder: (context, colIndex) {
                     final status = _columns[colIndex];
-                    final colTasks = allTasks.where((t) => t.status == status).toList()
+                    final colTasks = allTasks
+                        .where((t) => t.status == status)
+                        .toList()
                       ..sort((a, b) => a.orderIndex.compareTo(b.orderIndex));
 
                     return _buildColumnView(context, status, colTasks);
@@ -116,7 +152,8 @@ class _KanbanBoardScreenState extends ConsumerState<KanbanBoardScreen> {
     );
   }
 
-  Widget _buildColumnView(BuildContext context, TaskStatus status, List<Task> tasks) {
+  Widget _buildColumnView(
+      BuildContext context, TaskStatus status, List<Task> tasks) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return DragTarget<Task>(
@@ -137,24 +174,34 @@ class _KanbanBoardScreenState extends ConsumerState<KanbanBoardScreen> {
           decoration: BoxDecoration(
             color: isHovered
                 ? SketchPalette.markerYellow.withValues(alpha: 0.12)
-                : (isDark ? SketchPalette.paperSurfaceDark.withValues(alpha: 0.5) : SketchPalette.paperSurfaceLight.withValues(alpha: 0.7)),
-            borderRadius: BorderRadius.circular(12),
+                : (isDark
+                    ? SketchPalette.paperSurfaceDark.withValues(alpha: 0.5)
+                    : SketchPalette.paperSurfaceLight.withValues(alpha: 0.7)),
+            borderRadius: BorderRadius.circular(14),
             border: Border.all(
-              color: isHovered ? SketchPalette.markerYellowDark : Colors.transparent,
-              width: 1.5,
+              color: isHovered
+                  ? SketchPalette.markerYellowDark
+                  : (isDark
+                      ? SketchPalette.borderSubtleDark
+                      : SketchPalette.borderSubtleLight),
+              width: isHovered ? 1.5 : 1,
             ),
           ),
           child: Column(
             children: [
               // Column Header
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
                       status.label,
-                      style: const TextStyle(fontFamily: 'Caveat', fontSize: 20, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                          fontFamily: 'Caveat',
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold),
                     ),
                     Text(
                       '${tasks.length} cards',
@@ -174,7 +221,9 @@ class _KanbanBoardScreenState extends ConsumerState<KanbanBoardScreen> {
                           style: TextStyle(
                             fontFamily: 'Caveat',
                             fontSize: 16,
-                            color: isDark ? SketchPalette.inkMutedDark : SketchPalette.inkMutedLight,
+                            color: isDark
+                                ? SketchPalette.inkMutedDark
+                                : SketchPalette.inkMutedLight,
                           ),
                         ),
                       )
@@ -227,7 +276,8 @@ class _KanbanBoardScreenState extends ConsumerState<KanbanBoardScreen> {
     );
   }
 
-  Widget _buildCardContent(BuildContext context, Task task, {bool isDragging = false}) {
+  Widget _buildCardContent(BuildContext context, Task task,
+      {bool isDragging = false}) {
     final isDone = task.status == TaskStatus.done;
 
     return SketchCard(
@@ -278,13 +328,15 @@ class _KanbanBoardScreenState extends ConsumerState<KanbanBoardScreen> {
                 style: TextStyle(
                   fontSize: 11,
                   color: task.isOverdue ? SketchPalette.danger : Colors.grey,
-                  fontWeight: task.isOverdue ? FontWeight.bold : FontWeight.normal,
+                  fontWeight:
+                      task.isOverdue ? FontWeight.bold : FontWeight.normal,
                 ),
               ),
               if (task.completedAt != null)
                 Text(
                   'Done ${task.completedAt!.month}/${task.completedAt!.day}',
-                  style: const TextStyle(fontSize: 11, color: SketchPalette.sageGreen),
+                  style: const TextStyle(
+                      fontSize: 11, color: SketchPalette.sageGreen),
                 ),
             ],
           ),
